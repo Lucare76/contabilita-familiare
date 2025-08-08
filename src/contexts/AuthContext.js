@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
+import { auth } from "../firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 const AuthContext = createContext();
 
@@ -8,31 +9,21 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const auth = getAuth();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
+      setCurrentUser(user);
       setLoading(false);
     });
+
     return unsubscribe;
-  }, [auth]);
-
-  const login = () => {
-    const provider = new GoogleAuthProvider();
-    return signInWithPopup(auth, provider);
-  };
-
-  const logout = () => {
-    return signOut(auth);
-  };
+  }, []);
 
   const value = {
-    user,
-    login,
-    logout,
+    currentUser,
+    isAdmin: currentUser?.email === "il-tuo-email@gmail.com"
   };
 
   return (
